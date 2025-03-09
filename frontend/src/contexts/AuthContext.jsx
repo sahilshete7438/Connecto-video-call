@@ -2,9 +2,10 @@ import axios from "axios";
 import httpStatus from "http-status";
 import { createContext, useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import server from "../environment";
 
 
-const server = "http://localhost:8000"; // Change this if your backend runs on a different port
+
 
 
 export const AuthContext = createContext({});
