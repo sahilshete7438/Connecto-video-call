@@ -22,17 +22,20 @@ app.use(express.urlencoded({ limit: "40kb", extended: true }));
 app.use("/api/v1/users", userRoutes);
 
 const start = async () => {
-    app.set("mongo_user")
-    const mongoURI = process.env.MONGO_URI || process.env.MONGO_URL || process.env.MONGODB_URI || process.env.DATABASE_URL || "mongodb://127.0.0.1:27017/connecto";
-    const connectionDb = await mongoose.connect(mongoURI);
+    try {
+        app.set("mongo_user")
+        const mongoURI = process.env.MONGO_URI || process.env.MONGO_URL || process.env.MONGODB_URI || process.env.DATABASE_URL || "mongodb://127.0.0.1:27017/connecto";
+        console.log("Connecting to MongoDB...");
+        const connectionDb = await mongoose.connect(mongoURI);
 
-    console.log(`MONGO Connected DB HOst: ${connectionDb.connection.host}`)
-    server.listen(app.get("port"), () => {
-        console.log("LISTENIN ON PORT 8000")
-    });
-
-
-
+        console.log(`MONGO Connected DB Host: ${connectionDb.connection.host}`)
+        server.listen(app.get("port"), () => {
+            console.log("LISTENING ON PORT 8000")
+        });
+    } catch (e) {
+        console.error("CRITICAL ERROR DURING STARTUP:", e);
+        process.exit(1);
+    }
 }
 
 
