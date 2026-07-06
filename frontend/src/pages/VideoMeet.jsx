@@ -518,25 +518,25 @@ export default function VideoMeetComponent() {
                         sx={{ 
                             flex: 1,
                             display: 'flex', 
-                            flexDirection: { xs: 'column', md: 'row' }, 
+                            flexDirection: { xs: 'column', sm: 'row' }, 
                             alignItems: 'center', 
                             justifyContent: 'center', 
-                            gap: 8,
+                            gap: { xs: 4, sm: 6, md: 8 },
                             width: '100%',
                             maxWidth: 1100,
                             mx: 'auto',
-                            px: 6,
+                            px: { xs: 3, sm: 4, md: 6 },
                             py: 4,
                             zIndex: 1
                         }}
                     >
                         {/* Left Column: Video Preview with controls */}
-                        <Box sx={{ flex: 1.2, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                        <Box sx={{ flex: 1.2, display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
                             <Box 
                                 sx={{ 
                                     position: 'relative', 
                                     width: '100%', 
-                                    maxWidth: 580, 
+                                    maxWidth: { xs: '100%', sm: 500, md: 580 }, 
                                     aspectRatio: '16/9', 
                                     borderRadius: '20px', 
                                     overflow: 'hidden', 

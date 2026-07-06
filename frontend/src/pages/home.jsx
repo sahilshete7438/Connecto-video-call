@@ -87,20 +87,20 @@ function HomeComponent() {
                 sx={{ 
                     flex: 1, 
                     display: 'flex', 
-                    flexDirection: { xs: 'column-reverse', md: 'row' },
+                    flexDirection: { xs: 'column-reverse', sm: 'row' },
                     alignItems: 'center', 
                     justifyContent: 'center', 
-                    px: { xs: 3, md: 6 }, 
-                    py: { xs: 5, md: 0 },
-                    gap: { xs: 5, md: 10 },
+                    px: { xs: 3, sm: 4, md: 6 }, 
+                    py: { xs: 5, sm: 0 },
+                    gap: { xs: 5, sm: 6, md: 10 },
                     maxWidth: 1200,
                     mx: 'auto',
                     width: '100%'
                 }}
             >
                 {/* Left Panel: Actions and Title */}
-                <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 3, alignItems: { xs: 'center', md: 'flex-start' }, textAlign: { xs: 'center', md: 'left' } }}>
-                    <Typography sx={{ fontWeight: '800', lineHeight: 1.2, color: '#1a1a1a', fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem' } }}>
+                <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 3, alignItems: { xs: 'center', sm: 'flex-start' }, textAlign: { xs: 'center', sm: 'left' } }}>
+                    <Typography sx={{ fontWeight: '800', lineHeight: 1.2, color: '#1a1a1a', fontSize: { xs: '1.8rem', sm: '2.2rem', md: '3rem' } }}>
                         Premium video meetings.<br />
                         Now free for everyone.
                     </Typography>
@@ -113,7 +113,7 @@ function HomeComponent() {
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2, width: '100%' }}>
                         
                         {/* New Meeting Button and Input Controls */}
-                        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2, alignItems: 'center', justifyContent: { xs: 'center', md: 'flex-start' }, width: '100%' }}>
+                        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2, alignItems: 'center', justifyContent: { xs: 'center', sm: 'flex-start' }, width: '100%' }}>
                             <Button 
                                 variant="contained" 
                                 onClick={handleCreateNewMeeting}
@@ -178,7 +178,7 @@ function HomeComponent() {
                         alt="Video Call Illustration" 
                         sx={{ 
                             width: '100%', 
-                            maxWidth: { xs: 350, md: 450 }, 
+                            maxWidth: { xs: 300, sm: 380, md: 450 }, 
                             height: 'auto',
                             filter: 'drop-shadow(0px 8px 24px rgba(14, 120, 249, 0.08))'
                         }}
