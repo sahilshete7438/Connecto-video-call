@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
 import io from "socket.io-client";
-import { Badge, IconButton, TextField } from '@mui/material';
+import { Badge, IconButton, TextField, Box, Typography, Avatar } from '@mui/material';
 import { Button } from '@mui/material';
 import VideocamIcon from '@mui/icons-material/Videocam';
 import VideocamOffIcon from '@mui/icons-material/VideocamOff'
@@ -11,6 +11,7 @@ import MicOffIcon from '@mui/icons-material/MicOff'
 import ScreenShareIcon from '@mui/icons-material/ScreenShare';
 import StopScreenShareIcon from '@mui/icons-material/StopScreenShare'
 import ChatIcon from '@mui/icons-material/Chat'
+import CloseIcon from '@mui/icons-material/Close';
 import server from '../environment';
 
 
@@ -35,9 +36,9 @@ export default function VideoMeetComponent() {
 
     let [audioAvailable, setAudioAvailable] = useState(true);
 
-    let [video, setVideo] = useState([]);
+    let [video, setVideo] = useState(true);
 
-    let [audio, setAudio] = useState();
+    let [audio, setAudio] = useState(true);
 
     let [screen, setScreen] = useState();
 
@@ -68,8 +69,7 @@ export default function VideoMeetComponent() {
     useEffect(() => {
         console.log("HELLO")
         getPermissions();
-
-    })
+    }, [])
 
     let getDislayMedia = () => {
         if (screen) {
@@ -122,15 +122,7 @@ export default function VideoMeetComponent() {
         }
     };
 
-    useEffect(() => {
-        if (video !== undefined && audio !== undefined) {
-            getUserMedia();
-            console.log("SET STATE HAS ", video, audio);
 
-        }
-
-
-    }, [video, audio])
     let getMedia = () => {
         setVideo(videoAvailable);
         setAudio(audioAvailable);
@@ -233,19 +225,7 @@ export default function VideoMeetComponent() {
         }
 
         stream.getTracks().forEach(track => track.onended = () => {
-            setScreen(false)
-
-            try {
-                let tracks = localVideoref.current.srcObject.getTracks()
-                tracks.forEach(track => track.stop())
-            } catch (e) { console.log(e) }
-
-            let blackSilence = (...args) => new MediaStream([black(...args), silence()])
-            window.localStream = blackSilence()
-            localVideoref.current.srcObject = window.localStream
-
-            getUserMedia()
-
+            setScreen(false);
         })
     }
 
@@ -384,17 +364,35 @@ export default function VideoMeetComponent() {
     }
 
     let handleVideo = () => {
-        setVideo(!video);
-        // getUserMedia();
+        const newVideoState = !video;
+        setVideo(newVideoState);
+        if (window.localStream) {
+            window.localStream.getVideoTracks().forEach((track) => {
+                track.enabled = newVideoState;
+            });
+        }
     }
     let handleAudio = () => {
-        setAudio(!audio)
-        // getUserMedia();
+        const newAudioState = !audio;
+        setAudio(newAudioState);
+        if (window.localStream) {
+            window.localStream.getAudioTracks().forEach((track) => {
+                track.enabled = newAudioState;
+            });
+        }
     }
 
     useEffect(() => {
         if (screen !== undefined) {
-            getDislayMedia();
+            if (screen === true) {
+                getDislayMedia();
+            } else {
+                try {
+                    let tracks = localVideoref.current.srcObject.getTracks();
+                    tracks.forEach(track => track.stop());
+                } catch (e) { console.log(e); }
+                getUserMedia();
+            }
         }
     }, [screen])
     let handleScreen = () => {
@@ -451,20 +449,238 @@ export default function VideoMeetComponent() {
         <div>
 
             {askForUsername === true ?
+                <Box 
+                    sx={{ 
+                        minHeight: '100vh', 
+                        display: 'flex', 
+                        flexDirection: 'column', 
+                        backgroundColor: '#ffffff',
+                        position: 'relative',
+                        overflow: 'hidden'
+                    }}
+                >
+                    {/* Background Ambient Blobs for Premium Aesthetic */}
+                    <Box 
+                        sx={{ 
+                            position: 'absolute', 
+                            top: '-10%', 
+                            right: '-10%', 
+                            width: '450px', 
+                            height: '450px', 
+                            borderRadius: '50%', 
+                            backgroundColor: 'rgba(14, 120, 249, 0.08)', 
+                            filter: 'blur(120px)', 
+                            zIndex: 0,
+                            pointerEvents: 'none'
+                        }}
+                    />
+                    <Box 
+                        sx={{ 
+                            position: 'absolute', 
+                            bottom: '-15%', 
+                            left: '-10%', 
+                            width: '500px', 
+                            height: '500px', 
+                            borderRadius: '50%', 
+                            backgroundColor: 'rgba(234, 67, 53, 0.05)', 
+                            filter: 'blur(120px)', 
+                            zIndex: 0,
+                            pointerEvents: 'none'
+                        }}
+                    />
 
-                <div>
+                    {/* Top Navigation Bar */}
+                    <Box 
+                        sx={{ 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            px: 5, 
+                            py: 2.5, 
+                            backgroundColor: 'white', 
+                            borderBottom: '1px solid #eaeaea',
+                            boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.02)',
+                            zIndex: 1
+                        }}
+                    >
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                            <Box sx={{ bgcolor: '#0e78f9', p: 1, borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <VideocamIcon sx={{ color: 'white', fontSize: 24 }} />
+                            </Box>
+                            <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#0e78f9', letterSpacing: '0.5px' }}>
+                                CONNECTO
+                            </Typography>
+                        </Box>
+                    </Box>
 
+                    {/* Main Container */}
+                    <Box 
+                        sx={{ 
+                            flex: 1,
+                            display: 'flex', 
+                            flexDirection: { xs: 'column', md: 'row' }, 
+                            alignItems: 'center', 
+                            justifyContent: 'center', 
+                            gap: 8,
+                            width: '100%',
+                            maxWidth: 1100,
+                            mx: 'auto',
+                            px: 6,
+                            py: 4,
+                            zIndex: 1
+                        }}
+                    >
+                        {/* Left Column: Video Preview with controls */}
+                        <Box sx={{ flex: 1.2, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                            <Box 
+                                sx={{ 
+                                    position: 'relative', 
+                                    width: '100%', 
+                                    maxWidth: 580, 
+                                    aspectRatio: '16/9', 
+                                    borderRadius: '20px', 
+                                    overflow: 'hidden', 
+                                    backgroundColor: '#202124',
+                                    boxShadow: '0 12px 32px rgba(0, 0, 0, 0.15)',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center'
+                                }}
+                            >
+                                {/* Self Video Feed */}
+                                <video 
+                                    ref={(ref) => {
+                                        localVideoref.current = ref;
+                                        if (ref && window.localStream) {
+                                            ref.srcObject = window.localStream;
+                                        }
+                                    }}
+                                    autoPlay 
+                                    muted 
+                                    style={{ 
+                                        width: '100%', 
+                                        height: '100%', 
+                                        objectFit: 'cover',
+                                        transform: 'scaleX(-1)', // Mirror effect
+                                        display: video ? 'block' : 'none'
+                                    }}
+                                />
 
-                    <h2>Enter into Lobby </h2>
-                    <TextField id="outlined-basic" label="Username" value={username} onChange={e => setUsername(e.target.value)} variant="outlined" />
-                    <Button variant="contained" onClick={connect}>Connect</Button>
+                                {/* Placeholder when Camera is Off */}
+                                {!video && (
+                                    <Box sx={{ color: 'white', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+                                        <Avatar sx={{ width: 80, height: 80, bgcolor: '#5f6368', fontSize: 32 }}>
+                                            {username ? username.charAt(0).toUpperCase() : '?'}
+                                        </Avatar>
+                                        <Typography variant="body1" sx={{ fontWeight: '500' }}>Camera is off</Typography>
+                                    </Box>
+                                )}
 
+                                {/* Overlay Buttons for Mic and Camera */}
+                                <Box 
+                                    sx={{ 
+                                        position: 'absolute', 
+                                        bottom: 20, 
+                                        display: 'flex', 
+                                        gap: 2.5, 
+                                        zIndex: 10 
+                                    }}
+                                >
+                                    {/* Mic Toggle Icon */}
+                                    <IconButton 
+                                        onClick={handleAudio} 
+                                        sx={{ 
+                                            bgcolor: audio ? 'rgba(255, 255, 255, 0.2)' : '#ea4335',
+                                            color: 'white',
+                                            backdropFilter: 'blur(8px)',
+                                            '&:hover': {
+                                                bgcolor: audio ? 'rgba(255, 255, 255, 0.3)' : '#d93025'
+                                            },
+                                            p: 1.8,
+                                            boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
+                                        }}
+                                    >
+                                        {audio ? <MicIcon sx={{ fontSize: 22 }} /> : <MicOffIcon sx={{ fontSize: 22 }} />}
+                                    </IconButton>
 
-                    <div>
-                        <video ref={localVideoref} autoPlay muted></video>
-                    </div>
+                                    {/* Camera Toggle Icon */}
+                                    <IconButton 
+                                        onClick={handleVideo} 
+                                        sx={{ 
+                                            bgcolor: video ? 'rgba(255, 255, 255, 0.2)' : '#ea4335',
+                                            color: 'white',
+                                            backdropFilter: 'blur(8px)',
+                                            '&:hover': {
+                                                bgcolor: video ? 'rgba(255, 255, 255, 0.3)' : '#d93025'
+                                            },
+                                            p: 1.8,
+                                            boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
+                                        }}
+                                    >
+                                        {video ? <VideocamIcon sx={{ fontSize: 22 }} /> : <VideocamOffIcon sx={{ fontSize: 22 }} />}
+                                    </IconButton>
+                                </Box>
+                            </Box>
+                        </Box>
 
-                </div> :
+                        {/* Right Column: Name input and Join Form (Enclosed in card) */}
+                        <Box sx={{ flex: 0.8, display: 'flex', justifyContent: 'center', width: '100%' }}>
+                            <Box 
+                                sx={{ 
+                                    width: '100%', 
+                                    maxWidth: 380, 
+                                    backgroundColor: 'white', 
+                                    p: 4.5, 
+                                    borderRadius: '24px', 
+                                    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.05)',
+                                    border: '1px solid #f1f2f4',
+                                    display: 'flex', 
+                                    flexDirection: 'column', 
+                                    gap: 3 
+                                }}
+                            >
+                                <Box>
+                                    <Typography variant="h4" sx={{ fontWeight: 'bold', color: '#1a1a1a', mb: 1, letterSpacing: '-0.5px' }}>
+                                        Ready to join?
+                                    </Typography>
+                                    <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 'bold' }}>
+                                        Meeting code: {window.location.pathname.split("/").pop()}
+                                    </Typography>
+                                </Box>
+
+                                <TextField 
+                                    label="Your name" 
+                                    value={username} 
+                                    onChange={e => setUsername(e.target.value)} 
+                                    variant="outlined" 
+                                    fullWidth
+                                    autoFocus
+                                    InputProps={{
+                                        sx: { borderRadius: '10px', backgroundColor: 'white' }
+                                    }}
+                                />
+
+                                <Button 
+                                    variant="contained" 
+                                    onClick={connect}
+                                    disabled={!username.trim()}
+                                    sx={{ 
+                                        bgcolor: '#0e78f9', 
+                                        color: 'white', 
+                                        textTransform: 'none', 
+                                        fontWeight: 'bold', 
+                                        py: 1.8,
+                                        borderRadius: '25px',
+                                        fontSize: '16px',
+                                        boxShadow: '0 4px 12px rgba(14, 120, 249, 0.2)',
+                                        '&:hover': { bgcolor: '#0b5cff', boxShadow: '0 6px 16px rgba(14, 120, 249, 0.3)' }
+                                    }}
+                                >
+                                    Join now
+                                </Button>
+                            </Box>
+                        </Box>
+                    </Box>
+                </Box> :
 
 
                 <div className={styles.meetVideoContainer}>
@@ -472,7 +688,12 @@ export default function VideoMeetComponent() {
                     {showModal ? <div className={styles.chatRoom}>
 
                         <div className={styles.chatContainer}>
-                            <h1>Chat</h1>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '10px' }}>
+                                <h1>Chat</h1>
+                                <IconButton onClick={closeChat}>
+                                    <CloseIcon />
+                                </IconButton>
+                            </div>
 
                             <div className={styles.chattingDisplay}>
 
@@ -513,7 +734,7 @@ export default function VideoMeetComponent() {
 
                         {screenAvailable === true ?
                             <IconButton onClick={handleScreen} style={{ color: "white" }}>
-                                {screen === true ? <ScreenShareIcon /> : <StopScreenShareIcon />}
+                                {screen === true ? <StopScreenShareIcon /> : <ScreenShareIcon />}
                             </IconButton> : <></>}
 
                         <Badge badgeContent={newMessages} max={999} color='orange'>
@@ -524,7 +745,17 @@ export default function VideoMeetComponent() {
                     </div>
 
 
-                    <video className={styles.meetUserVideo} ref={localVideoref} autoPlay muted></video>
+                    <video 
+                        className={styles.meetUserVideo} 
+                        ref={(ref) => {
+                            localVideoref.current = ref;
+                            if (ref && window.localStream) {
+                                ref.srcObject = window.localStream;
+                            }
+                        }} 
+                        autoPlay 
+                        muted
+                    ></video>
 
                     <div className={styles.conferenceView}>
                         {videos.map((video) => (
