@@ -293,7 +293,7 @@ export default function VideoMeetComponent() {
                             // Update the stream of the existing video
                             setVideos(videos => {
                                 const updatedVideos = videos.map(video =>
-                                    video.socketId === socketListId ? { ...video, stream: event.stream, username: serverUsernames[socketListId] || "Guest" } : video
+                                    video.socketId === socketListId ? { ...video, stream: event.stream, username: (serverUsernames && serverUsernames[socketListId]) || "Guest" } : video
                                 );
                                 videoRef.current = updatedVideos;
                                 return updatedVideos;
@@ -306,7 +306,7 @@ export default function VideoMeetComponent() {
                                 stream: event.stream,
                                 autoplay: true,
                                 playsinline: true,
-                                username: serverUsernames[socketListId] || "Guest"
+                                username: (serverUsernames && serverUsernames[socketListId]) || "Guest"
                             };
 
                             setVideos(videos => {
@@ -768,12 +768,13 @@ export default function VideoMeetComponent() {
                             style={{ width: '100%', height: '100%', objectFit: 'cover', transform: 'scaleX(-1)' }}
                             ref={(ref) => {
                                 localVideoref.current = ref;
-                                if (ref && window.localStream) {
+                                if (ref && window.localStream && ref.srcObject !== window.localStream) {
                                     ref.srcObject = window.localStream;
                                 }
                             }} 
                             autoPlay 
                             muted
+                            playsInline
                         />
                         <Box 
                             sx={{ 
@@ -813,11 +814,12 @@ export default function VideoMeetComponent() {
                                 <video
                                     data-socket={video.socketId}
                                     ref={ref => {
-                                        if (ref && video.stream) {
+                                        if (ref && video.stream && ref.srcObject !== video.stream) {
                                             ref.srcObject = video.stream;
                                         }
                                     }}
                                     autoPlay
+                                    playsInline
                                     style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                 />
                                 <Box 
