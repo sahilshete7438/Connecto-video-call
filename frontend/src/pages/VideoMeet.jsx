@@ -260,7 +260,7 @@ export default function VideoMeetComponent() {
         socketRef.current.on('signal', gotMessageFromServer)
 
         socketRef.current.on('connect', () => {
-            socketRef.current.emit('join-call', window.location.href)
+            socketRef.current.emit('join-call', window.location.href, username)
             socketIdRef.current = socketRef.current.id
 
             socketRef.current.on('chat-message', addMessage)
@@ -269,7 +269,7 @@ export default function VideoMeetComponent() {
                 setVideos((videos) => videos.filter((video) => video.socketId !== id))
             })
 
-            socketRef.current.on('user-joined', (id, clients) => {
+            socketRef.current.on('user-joined', (id, clients, serverUsernames) => {
                 clients.forEach((socketListId) => {
 
                     connections[socketListId] = new RTCPeerConnection(peerConfigConnections)
@@ -293,7 +293,7 @@ export default function VideoMeetComponent() {
                             // Update the stream of the existing video
                             setVideos(videos => {
                                 const updatedVideos = videos.map(video =>
-                                    video.socketId === socketListId ? { ...video, stream: event.stream } : video
+                                    video.socketId === socketListId ? { ...video, stream: event.stream, username: serverUsernames[socketListId] || "Guest" } : video
                                 );
                                 videoRef.current = updatedVideos;
                                 return updatedVideos;
@@ -305,7 +305,8 @@ export default function VideoMeetComponent() {
                                 socketId: socketListId,
                                 stream: event.stream,
                                 autoplay: true,
-                                playsinline: true
+                                playsinline: true,
+                                username: serverUsernames[socketListId] || "Guest"
                             };
 
                             setVideos(videos => {
@@ -745,23 +746,71 @@ export default function VideoMeetComponent() {
                     </div>
 
 
-                    <video 
-                        className={styles.meetUserVideo} 
-                        ref={(ref) => {
-                            localVideoref.current = ref;
-                            if (ref && window.localStream) {
-                                ref.srcObject = window.localStream;
-                            }
-                        }} 
-                        autoPlay 
-                        muted
-                    ></video>
+                    {/* Local User Video with Username Overlay */}
+                    <Box 
+                        sx={{ 
+                            position: 'absolute', 
+                            bottom: '10vh', 
+                            left: '20px', 
+                            height: '20vh', 
+                            aspectRatio: '16/9',
+                            borderRadius: '16px',
+                            overflow: 'hidden',
+                            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                            zIndex: 2,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            backgroundColor: '#202124'
+                        }}
+                    >
+                        <video 
+                            style={{ width: '100%', height: '100%', objectFit: 'cover', transform: 'scaleX(-1)' }}
+                            ref={(ref) => {
+                                localVideoref.current = ref;
+                                if (ref && window.localStream) {
+                                    ref.srcObject = window.localStream;
+                                }
+                            }} 
+                            autoPlay 
+                            muted
+                        />
+                        <Box 
+                            sx={{ 
+                                position: 'absolute', 
+                                bottom: 8, 
+                                left: 8, 
+                                bgcolor: 'rgba(0,0,0,0.5)', 
+                                color: 'white', 
+                                px: 1, 
+                                py: 0.5, 
+                                borderRadius: '4px', 
+                                fontSize: '11px', 
+                                fontWeight: '500',
+                                backdropFilter: 'blur(4px)'
+                            }}
+                        >
+                            {username} (You)
+                        </Box>
+                    </Box>
 
+                    {/* Remote Participant Streams Grid */}
                     <div className={styles.conferenceView}>
                         {videos.map((video) => (
-                            <div key={video.socketId}>
+                            <Box 
+                                key={video.socketId} 
+                                sx={{ 
+                                    position: 'relative', 
+                                    width: '100%', 
+                                    maxWidth: '320px', 
+                                    aspectRatio: '16/9',
+                                    borderRadius: '12px',
+                                    overflow: 'hidden',
+                                    backgroundColor: '#202124',
+                                    boxShadow: '0 4px 16px rgba(0,0,0,0.08)'
+                                }}
+                            >
                                 <video
-
                                     data-socket={video.socketId}
                                     ref={ref => {
                                         if (ref && video.stream) {
@@ -769,12 +818,27 @@ export default function VideoMeetComponent() {
                                         }
                                     }}
                                     autoPlay
+                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                />
+                                <Box 
+                                    sx={{ 
+                                        position: 'absolute', 
+                                        bottom: 8, 
+                                        left: 8, 
+                                        bgcolor: 'rgba(0,0,0,0.5)', 
+                                        color: 'white', 
+                                        px: 1, 
+                                        py: 0.5, 
+                                        borderRadius: '4px', 
+                                        fontSize: '11px', 
+                                        fontWeight: '500',
+                                        backdropFilter: 'blur(4px)'
+                                    }}
                                 >
-                                </video>
-                            </div>
-
+                                    {video.username || "Guest"}
+                                </Box>
+                            </Box>
                         ))}
-
                     </div>
 
                 </div>

@@ -94,3 +94,41 @@
   height: auto;
   border-radius: 20px;
 }
+
+@media (max-width: 768px) {
+  .landingMainContainer {
+    flex-direction: column-reverse;
+    justify-content: center;
+    height: auto;
+    padding-block: 4rem;
+    gap: 2rem;
+    text-align: center;
+  }
+  
+  .landingMainContainer > div:nth-child(1) h1 {
+    font-size: 2.2rem;
+  }
+  
+  .landingMainContainer > div:nth-child(1) p {
+    font-size: 1.1rem;
+  }
+
+  .landingMainContainer > div:nth-child(1) div[role='button'] {
+    margin: 1.5rem auto 0 auto;
+  }
+
+  .landingMainContainer > div:nth-child(2) img {
+    height: 35vh;
+  }
+
+  .landingPageContainer nav {
+    flex-direction: column;
+    gap: 1.2rem;
+    text-align: center;
+  }
+
+  .landingPageContainer nav .navlist {
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+}

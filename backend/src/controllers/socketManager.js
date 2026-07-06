@@ -4,6 +4,7 @@ import { Server } from "socket.io"
 let connections = {}
 let messages = {}
 let timeOnline = {}
+let usernames = {}
 
 export const connectToSocket = (server) => {
     const io = new Server(server, {
@@ -20,21 +21,18 @@ export const connectToSocket = (server) => {
 
         console.log("SOMETHING CONNECTED")
 
-        socket.on("join-call", (path) => {
+        socket.on("join-call", (path, username) => {
 
             if (connections[path] === undefined) {
                 connections[path] = []
             }
             connections[path].push(socket.id)
+            usernames[socket.id] = username || "Guest";
 
             timeOnline[socket.id] = new Date();
 
-            // connections[path].forEach(elem => {
-            //     io.to(elem)
-            // })
-
             for (let a = 0; a < connections[path].length; a++) {
-                io.to(connections[path][a]).emit("user-joined", socket.id, connections[path])
+                io.to(connections[path][a]).emit("user-joined", socket.id, connections[path], usernames)
             }
 
             if (messages[path] !== undefined) {
@@ -82,6 +80,8 @@ export const connectToSocket = (server) => {
         socket.on("disconnect", () => {
 
             var diffTime = Math.abs(timeOnline[socket.id] - new Date())
+
+            delete usernames[socket.id]
 
             var key
 
